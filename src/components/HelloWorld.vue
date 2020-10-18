@@ -10,6 +10,7 @@ import AuthClient from '@verida/vault-auth-client'
 
 const authConfig = {
   serverUri: "ws://localhost:7001",
+  loginUri: "http://localhost:8080",
   canvasId: "canvas"
 }
 
