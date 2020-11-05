@@ -1,30 +1,20 @@
 <template>
   <div class="hello">
-    <button @click="start">{{ buttonText }}</button>
-    <canvas id="canvas"></canvas>
+      <button verida-config-server-uri="ws://localhost:7001">{{ buttonText }}</button>
   </div>
 </template>
 
 <script>
-import AuthClient from '@verida/vault-auth-client'
-
-const authConfig = {
-  serverUri: "ws://localhost:7001",
-  loginUri: "http://localhost:8080",
-  canvasId: "canvas"
-}
+import { veridaVaultLogin } from '@verida/vault-auth-client'
 
 export default {
   name: 'HelloWorld',
   props: {
     buttonText: String
   },
-  methods: {
-    start() {
-      console.log("Starting auth process...")
-      new AuthClient(authConfig)
-    }
-  }
+  mounted() {
+    veridaVaultLogin();
+  },
 }
 </script>
 
