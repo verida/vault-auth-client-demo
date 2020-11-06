@@ -1,16 +1,23 @@
 <template>
   <div class="hello">
-      <button verida-config-server-uri="ws://localhost:7001">{{ buttonText }}</button>
+        <p class="btn" verida-config-server-uri="ws://localhost:7001">
+          <span>{{ buttonText }}</span>
+          <VeridaLogo :width="67" textColor="white"/>
+        </p>
   </div>
 </template>
 
 <script>
 import { veridaVaultLogin } from '@verida/vault-auth-client'
+import VeridaLogo from './VeridaLogo'
 
 export default {
   name: 'HelloWorld',
   props: {
     buttonText: String
+  },
+  components: {
+    VeridaLogo
   },
   mounted() {
     veridaVaultLogin();
@@ -20,18 +27,36 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  width: 334px;
+  height: 44px;
+  border: 1px solid;
+  background: #041133;
+  color: #fff;
+  padding: 0 15px 0 15px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.btn span {
+  padding-right: 10px;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+@media screen and (max-width: 700px) {
+  .btn {
+    width: 50%;
+    height: max-content;
+    flex-direction: column;
+    padding: 5px;
+  }
+  .btn span {
+    padding-right: 0px;
+  }
 }
-a {
-  color: #42b983;
+.btn:hover {
+  background: #08256d;
+  cursor: pointer;
 }
 </style>
