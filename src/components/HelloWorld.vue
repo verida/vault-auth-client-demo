@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-        <p class="btn" verida-config-server-uri="ws://localhost:7001">
+        <p class="btn" verida-vault-login-btn="true">
           <span>{{ buttonText }}</span>
           <VeridaLogo :width="67" textColor="white"/>
         </p>
@@ -20,7 +20,10 @@ export default {
     VeridaLogo
   },
   mounted() {
-    veridaVaultLogin();
+    veridaVaultLogin({
+      loginUri: 'http://192.168.1.29:8080/mobile/auth-request.html',
+      serverUri: 'ws://localhost:7001'
+    });
   },
 }
 </script>
