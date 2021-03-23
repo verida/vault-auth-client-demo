@@ -44,8 +44,8 @@ export default {
     startLogin () {
       console.log("starting login with ", this.appName)
       veridaVaultLogin({
-        loginUri: 'http://192.168.1.29:8080/mobile/auth-request.html',
-        serverUri: 'ws://192.168.1.29:7001',
+        loginUri: 'https://vault.testnet.verida.io/mobile/auth-request.html',
+        serverUri: 'ws://auth-server.testnet.verida.io:7001',
         appName: this.appName,
         callback: async (response) => {
           console.log(`${response.did} succesfully logged in`)
