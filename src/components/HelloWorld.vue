@@ -8,12 +8,23 @@
         </p>
       </div>
       <div v-if="loggedIn" id="result-container">
-        <p>Welcome <strong>{{ veridaApp.user.did }}</strong>, you are now connected to <strong>{{ veridaApp.appName }}</strong>!</p>
-        <div class="databases">
-          <p>The following databases were found in this application:</p>
-          <ol>
-            <li v-for="(item, index) in databases" :key="index">{{ item.dbName }}</li>
-          </ol>
+        <p v-if="avatarSource" class="avatar"><img :src="avatarSource" /></p>
+        <h3>Welcome <strong>{{ profileData.name }}</strong>!</h3>
+        <p v-if="profileData.description">{{profileData.description}}</p>
+        <p v-if="profileData.country">{{profileData.country}}</p>
+        <p><a href="#" @click="logout">Logout</a></p>
+        <hr/>
+        <p>Connected to: <strong>{{ veridaApp.appName }}</strong></p>
+
+        <div class="notes-app">
+          <textarea v-model="note"></textarea>
+          <button @click="saveNote">Save Note</button>
+          <div class="notes">
+            <h5>Encrypted Notes:</h5>
+            <ol>
+              <li class="note" v-for="(item, index) in notes" :key="index">{{ item.note }}</li>
+            </ol>
+          </div>
         </div>
       </div>
   </div>
@@ -36,16 +47,44 @@ export default {
     return {
       appName: 'Verida: Auth client demo',
       loggedIn: false,
-      databases: [],
-      veridaApp: null
+      //databases: [],
+      veridaApp: null,
+      profile: null,
+      profileData: {},
+      avatarSource: null,
+      notes: [],
+      note: ""
     }
   },
   methods: {
+    async saveNote() {
+      console.log('save note', this.note)
+
+      let notesDb = await window.veridaApp.openDatabase("notes")
+      const note = {
+        note: this.note
+      }
+      notesDb.save(note)
+      this.notes.unshift(note)
+      console.log(this.notes)
+    },
+    logout() {
+      this.loggedIn = false;
+      this.profile = null
+      this.profileData = {}
+      this.avatarSource = null
+    },
+    loadAvatar() {
+      if (this.profileData.avatar) {
+          this.profileData.avatar = JSON.parse(this.profileData.avatar)
+          this.avatarSource = `data:image/${this.profileData.avatar.format};base64,${this.profileData.avatar.base64}`
+        }
+    },
     startLogin () {
       console.log("starting login with ", this.appName)
       veridaVaultLogin({
         loginUri: 'https://vault.testnet.verida.io/mobile/auth-request.html',
-        serverUri: 'ws://auth-server.testnet.verida.io:7001',
+        serverUri: 'wss://auth-server.testnet.verida.io:7001',
         appName: this.appName,
         callback: async (response) => {
           console.log(`${response.did} succesfully logged in`)
@@ -59,14 +98,49 @@ export default {
           await veridaApp.connect(true)
           this.loggedIn = true
           this.veridaApp = window.veridaApp = veridaApp
-          let ds = await window.veridaApp.openDatastore("https://schemas.verida.io/storage/database/schema.json")
-          this.databases = await ds.getMany()
+          let notesDb = await window.veridaApp.openDatabase("notes")
+          this.notes = await notesDb.getMany()
+
+          
+          this.profile = await window.veridaApp.openProfile(response.did, 'Verida: Vault')
+          const data = await this.profile.getMany()
+
+          this.profileData = data.reduce((result, item) => { result[item.key] = item.value; return result }, {})
+          this.loadAvatar()
+
+          const db = await this.profile._store.getDb();
+          const dbInstance = await db.getInstance();
+          const component = this;
+          dbInstance.changes({
+              since: 'now',
+              live: true
+          }).on('change', async function (info) {
+              const row = await db?.get(info.id, {
+                rev: info.changes[0].rev
+              });
+              console.log(row)
+
+              component.profileData[row.key] = row.value
+              if (row.key == 'avatar') {
+                this.loadAvatar()
+              }
+          });
         }
       });
     }
   }
 }
 </script>
+
+<style>
+#app {
+  margin: auto;
+  max-width: 500px;
+  width: 80%;
+  display: inherit !important;
+  flex-direction: inherit !important;
+}
+</style>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
@@ -81,6 +155,8 @@ export default {
   background: #041133;
   color: #fff;
   padding: 0 15px 0 15px;
+  margin: auto;
+  margin-top: 10px;
 }
 
 .btn span {
@@ -102,9 +178,28 @@ export default {
   background: #08256d;
   cursor: pointer;
 }
+#result-container {
+  max-width: 80%;
+  margin: auto;
+}
+
 #result-container .databases {
-  max-width: 600px;
   text-align: left;
   margin: auto;
+}
+
+.avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+}
+
+.notes-app {
+  text-align: left;
+}
+
+.notes-app textarea {
+  width: 100%;
+  height: 60px;
 }
 </style>
