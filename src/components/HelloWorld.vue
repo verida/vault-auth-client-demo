@@ -58,7 +58,6 @@ export default {
   },
   methods: {
     async saveNote() {
-      console.log('save note', this.note)
 
       let notesDb = await window.veridaApp.openDatabase("notes")
       const note = {
@@ -66,7 +65,6 @@ export default {
       }
       notesDb.save(note)
       this.notes.unshift(note)
-      console.log(this.notes)
     },
     logout() {
       this.loggedIn = false;
@@ -81,7 +79,6 @@ export default {
         }
     },
     startLogin () {
-      console.log("starting login with ", this.appName)
       veridaVaultLogin({
         loginUri: 'https://vault.testnet.verida.io/mobile/auth-request.html',
         serverUri: 'wss://auth-server.testnet.verida.io:7001',
@@ -115,14 +112,14 @@ export default {
               since: 'now',
               live: true
           }).on('change', async function (info) {
-              const row = await db?.get(info.id, {
+              const row = await db.get(info.id, {
                 rev: info.changes[0].rev
               });
-              console.log(row)
 
               component.profileData[row.key] = row.value
+              
               if (row.key == 'avatar') {
-                this.loadAvatar()
+                component.loadAvatar()
               }
           });
         }
