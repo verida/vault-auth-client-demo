@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@verida/datastore": "^0.6.3",
+    "@verida/vault-auth-client": "git+https://github.com/verida/vault-auth-client.git",
     "core-js": "^3.6.5",
     "vue": "^2.6.11"
   },
